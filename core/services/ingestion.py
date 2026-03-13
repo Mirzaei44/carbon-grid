@@ -1,9 +1,14 @@
 from core.models import Region, CarbonRecord
 
+import logging
+
+logger = logging.getLogger("core")
+
 
 def save_intensity_payload(payload):
-    items = payload.get("data", [])
+    logger.info("Starting intensity payload save")
 
+    items = payload.get("data", [])
     saved = 0
 
     for item in items:
@@ -21,6 +26,10 @@ def save_intensity_payload(payload):
                 "index_label": intensity.get("index", ""),
             },
         )
+
         saved += 1
+        logger.info(f"Saved record for region={region.name} from={item['from']}")
+
+    logger.info(f"Saved {saved} carbon intensity records")
 
     return saved
