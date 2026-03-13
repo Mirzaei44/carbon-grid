@@ -1,4 +1,5 @@
 from rest_framework.decorators import api_view
+from django.shortcuts import render
 from rest_framework.response import Response
 from .tasks import ingest_current_intensity_task
 from .models import CarbonRecord
@@ -96,3 +97,18 @@ def generate_report(request):
             "task_id": task.id,
         }
     )
+    
+def dashboard_page(request):
+    records = CarbonRecord.objects.select_related("region").order_by("-from_time")[:20]
+    records = list(records)[::-1]
+
+    labels = [r.from_time.strftime("%H:%M") for r in records]
+    actual_values = [r.actual_intensity for r in records]
+    forecast_values = [r.forecast_intensity for r in records]
+
+    context = {
+        "labels": labels,
+        "actual_values": actual_values,
+        "forecast_values": forecast_values,
+    }
+    return render(request, "core/dashboard.html", context)
