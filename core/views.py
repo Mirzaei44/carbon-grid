@@ -8,7 +8,8 @@ from .services.ingestion import save_intensity_payload
 from .models import CarbonRecord, Report
 from .serializers import CarbonRecordSerializer, ReportRequestSerializer
 from .tasks import ingest_current_intensity_task, generate_report_task
-
+from django_ratelimit.decorators import ratelimit
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 @api_view(["POST"])
 def ingest_current_intensity(request):
     task = ingest_current_intensity_task.delay()
@@ -75,6 +76,7 @@ def dashboard_summary(request):
         }
     )
     
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
 @api_view(["POST"])
 def generate_report(request):
     serializer = ReportRequestSerializer(data=request.data)
