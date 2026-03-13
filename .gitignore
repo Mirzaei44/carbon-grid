@@ -6,3 +6,6 @@ db.sqlite3
 media/
 staticfiles/
 .DS_Store
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
