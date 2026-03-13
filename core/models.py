@@ -22,3 +22,20 @@ class CarbonRecord(models.Model):
 
     def __str__(self):
         return f"{self.region.name} | {self.from_time}"
+    
+class Report(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+    ]
+
+    email = models.EmailField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    file = models.FileField(upload_to="reports/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.email} | {self.status}"

@@ -21,3 +21,7 @@ class CarbonRecordSerializer(serializers.ModelSerializer):
             "actual_intensity",
             "index_label",
         ]
+
+
+class ReportRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()

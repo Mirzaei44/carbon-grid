@@ -5,7 +5,9 @@ from .models import CarbonRecord
 from .serializers import CarbonRecordSerializer
 from .services.carbon_api import fetch_current_intensity
 from .services.ingestion import save_intensity_payload
-
+from .models import CarbonRecord, Report
+from .serializers import CarbonRecordSerializer, ReportRequestSerializer
+from .tasks import ingest_current_intensity_task, generate_report_task
 
 @api_view(["POST"])
 def ingest_current_intensity(request):
@@ -70,5 +72,25 @@ def dashboard_summary(request):
             "latest_region": latest_record.region.name if latest_record else None,
             "latest_from_time": latest_record.from_time if latest_record else None,
             "latest_actual_intensity": latest_record.actual_intensity if latest_record else None,
+        }
+    )
+    
+@api_view(["POST"])
+def generate_report(request):
+    serializer = ReportRequestSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    report = Report.objects.create(
+        email=serializer.validated_data["email"],
+        status="pending",
+    )
+
+    task = generate_report_task.delay(report.id)
+
+    return Response(
+        {
+            "status": "queued",
+            "report_id": report.id,
+            "task_id": task.id,
         }
     )
