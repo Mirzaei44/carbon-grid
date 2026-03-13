@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from .tasks import ingest_current_intensity_task
 from .models import CarbonRecord
 from .serializers import CarbonRecordSerializer
 from .services.carbon_api import fetch_current_intensity
@@ -9,9 +9,8 @@ from .services.ingestion import save_intensity_payload
 
 @api_view(["POST"])
 def ingest_current_intensity(request):
-    payload = fetch_current_intensity()
-    saved = save_intensity_payload(payload)
-    return Response({"status": "ok", "saved": saved})
+    task = ingest_current_intensity_task.delay()
+    return Response({"status": "queued", "task_id": task.id})
 
 
 @api_view(["GET"])
